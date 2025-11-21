@@ -1,0 +1,89 @@
+import React, { useMemo } from 'react';
+import { ExtractedData, ProcessingStatus, ReceiptItem } from '../types';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+
+interface DataVisualizationProps {
+  items: ReceiptItem[];
+}
+
+export const DataVisualization: React.FC<DataVisualizationProps> = ({ items }) => {
+  
+  const validData = useMemo(() => {
+    return items
+      .filter(item => item.status === ProcessingStatus.COMPLETED && item.data)
+      .map(item => item.data!);
+  }, [items]);
+
+  const totalSpent = validData.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
+  const totalMoms = validData.reduce((sum, item) => sum + (item.moms || 0), 0);
+  const itemCount = validData.length;
+
+  // Aggregate data by Shop for Bar Chart
+  const shopData = useMemo(() => {
+    const map = new Map<string, number>();
+    validData.forEach(d => {
+      const shop = d.shopName || "Unknown";
+      map.set(shop, (map.get(shop) || 0) + d.totalAmount);
+    });
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+  }, [validData]);
+
+  const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#6366f1'];
+
+  if (itemCount === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Summary Cards */}
+      <div className="lg:col-span-1 space-y-4">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="text-slate-500 text-sm font-medium uppercase tracking-wide mb-1">Total Spent</h3>
+          <div className="text-3xl font-bold text-slate-800">{totalSpent.toFixed(2)} <span className="text-sm font-normal text-slate-400">DKK</span></div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="text-slate-500 text-sm font-medium uppercase tracking-wide mb-1">Total MOMS (VAT)</h3>
+          <div className="text-3xl font-bold text-slate-800">{totalMoms.toFixed(2)} <span className="text-sm font-normal text-slate-400">DKK</span></div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="text-slate-500 text-sm font-medium uppercase tracking-wide mb-1">Receipts Processed</h3>
+          <div className="text-3xl font-bold text-slate-800">{itemCount}</div>
+        </div>
+      </div>
+
+      {/* Bar Chart */}
+      <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+        <h3 className="text-slate-700 font-semibold mb-6">Spending by Shop</h3>
+        <div className="flex-grow min-h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={shopData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis 
+                dataKey="name" 
+                stroke="#94a3b8" 
+                tick={{ fill: '#64748b', fontSize: 12 }} 
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                stroke="#94a3b8" 
+                tick={{ fill: '#64748b', fontSize: 12 }} 
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `${value}`}
+              />
+              <Tooltip 
+                cursor={{ fill: '#f1f5f9' }}
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {shopData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+};
