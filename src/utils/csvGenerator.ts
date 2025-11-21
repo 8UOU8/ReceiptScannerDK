@@ -1,4 +1,4 @@
-import { ReceiptItem } from "../types";
+import type { ReceiptItem } from "../types";
 
 export const generateCSV = (receipts: ReceiptItem[]): void => {
   // Filter only completed items

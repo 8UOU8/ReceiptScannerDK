@@ -1,9 +1,11 @@
-export enum ProcessingStatus {
-  IDLE = 'IDLE',
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  ERROR = 'ERROR'
-}
+export const ProcessingStatus = {
+  IDLE: 'IDLE',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  ERROR: 'ERROR'
+} as const;
+
+export type ProcessingStatus = typeof ProcessingStatus[keyof typeof ProcessingStatus];
 
 export interface ExtractedData {
   shopName: string;

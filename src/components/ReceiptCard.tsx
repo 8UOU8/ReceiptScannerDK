@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ReceiptItem, ProcessingStatus, ExtractedData } from '../types';
+import { ProcessingStatus } from '../types';
+import type { ReceiptItem, ExtractedData } from '../types';
 import { Trash2, CheckCircle, AlertCircle, Loader2, Edit2, Save, X } from 'lucide-react';
 
 interface ReceiptCardProps {

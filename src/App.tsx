@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, Download, RefreshCw, Plus, Loader2, LogOut } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { ReceiptItem, ProcessingStatus, ExtractedData } from './types';
+import { ProcessingStatus } from './types';
+import type { ReceiptItem, ExtractedData } from './types';
 import { extractReceiptData } from './services/geminiService';
 import { ReceiptCard } from './components/ReceiptCard';
 import { generateCSV } from './utils/csvGenerator';

@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { ExtractedData } from "../types";
+import type { ExtractedData } from "../types";
 
 /**
  * Converts a File object to a Base64 string.

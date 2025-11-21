@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { ExtractedData, ProcessingStatus, ReceiptItem } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { ProcessingStatus } from '../types';
+import type { ReceiptItem } from '../types';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface DataVisualizationProps {
   items: ReceiptItem[];
@@ -76,7 +77,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ items }) =
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {shopData.map((entry, index) => (
+                {shopData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
