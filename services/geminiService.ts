@@ -30,23 +30,39 @@ MOMS (VAT) RULE:
 
 Return valid JSON with keys: "shopName", "purchaseDate" (YYYY-MM-DD), "totalAmount", "moms".`;
 
-const validateAndSanitizeData = (raw: any): ExtractedData => {
+const validateAndSanitizeData = (rawInput: any): ExtractedData => {
+  // 1. Handle case where AI returns an array of one object instead of just the object
+  const raw = Array.isArray(rawInput) ? rawInput[0] : rawInput;
+  
+  // 2. Explicitly cast and provide fallbacks to prevent 'undefined'
   const data: ExtractedData = {
-    shopName: String(raw.shopName || "Unknown Shop"),
-    purchaseDate: String(raw.purchaseDate || new Date().toISOString().split('T')[0]),
-    totalAmount: Number(raw.totalAmount) || 0,
-    moms: Number(raw.moms) || 0,
+    shopName: String(raw?.shopName || "Unknown Shop"),
+    purchaseDate: String(raw?.purchaseDate || new Date().toISOString().split('T')[0]),
+    // Use parseFloat to handle strings like "12.00" returned by AI
+    totalAmount: parseFloat(String(raw?.totalAmount || 0)) || 0,
+    moms: parseFloat(String(raw?.moms || 0)) || 0,
   };
 
-  // Danish Tax Logic check
+  // 3. Danish Tax Logic check
   if (data.moms > 0) {
     const expectedTotalFromMoms = data.moms * 5;
     const diff = Math.abs(data.totalAmount - expectedTotalFromMoms);
-    if (diff > 0.05 && diff < 2.0) {
+    if (diff > 0.05 && diff < 5.0) { // Wider tolerance for sanity
       data.totalAmount = Number(expectedTotalFromMoms.toFixed(2));
     }
   }
   return data;
+};
+
+// Helper to extract JSON from markdown if present
+const cleanJsonResponse = (text: string): any => {
+  try {
+    const cleaned = text.replace(/```json|```/gi, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error("Failed to parse AI response as JSON", text);
+    throw new Error("The AI returned an invalid data format. Please try again.");
+  }
 };
 
 export const extractReceiptData = async (
@@ -87,10 +103,11 @@ export const extractReceiptData = async (
     });
 
     if (response.text) {
-      return validateAndSanitizeData(JSON.parse(response.text));
+      return validateAndSanitizeData(cleanJsonResponse(response.text));
     }
     throw new Error("Empty response from Gemini.");
   } else {
+    // OpenRouter Implementation
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -105,7 +122,7 @@ export const extractReceiptData = async (
           {
             role: "user",
             content: [
-              { type: "text", text: SYSTEM_PROMPT + "\nReturn valid JSON." },
+              { type: "text", text: SYSTEM_PROMPT + "\nReturn valid JSON object strictly." },
               {
                 type: "image_url",
                 image_url: { url: `data:${file.type};base64,${base64Data}` },
@@ -118,11 +135,14 @@ export const extractReceiptData = async (
     });
 
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err?.error?.message || "OpenRouter failed");
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `OpenRouter failed: ${response.status}`);
     }
 
     const json = await response.json();
-    return validateAndSanitizeData(JSON.parse(json.choices[0].message.content));
+    const content = json.choices?.[0]?.message?.content;
+    if (!content) throw new Error("No content in OpenRouter response");
+    
+    return validateAndSanitizeData(cleanJsonResponse(content));
   }
 };

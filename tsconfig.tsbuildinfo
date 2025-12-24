@@ -1,0 +1,1 @@
+{"root":["./types.ts","./vite.config.ts","./services/geminiservice.ts","./utils/csvgenerator.ts","./utils/imageprocessing.ts","./app.tsx","./index.tsx","./components/datavisualization.tsx","./components/receiptcard.tsx"],"version":"5.9.3"}

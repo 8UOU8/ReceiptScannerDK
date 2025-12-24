@@ -14,15 +14,16 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ items }) =
       .map(item => item.data!);
   }, [items]);
 
-  const totalSpent = useMemo(() => validData.reduce((sum, item) => sum + (Number(item.totalAmount) || 0), 0), [validData]);
-  const totalMoms = useMemo(() => validData.reduce((sum, item) => sum + (Number(item.moms) || 0), 0), [validData]);
+  const totalSpent = useMemo(() => validData.reduce((sum, item) => sum + (parseFloat(String(item.totalAmount)) || 0), 0), [validData]);
+  const totalMoms = useMemo(() => validData.reduce((sum, item) => sum + (parseFloat(String(item.moms)) || 0), 0), [validData]);
   const itemCount = validData.length;
 
   const shopData = useMemo(() => {
     const map = new Map<string, number>();
     validData.forEach(d => {
       const shop = d.shopName || "Unknown";
-      map.set(shop, (map.get(shop) || 0) + (Number(d.totalAmount) || 0));
+      const amount = parseFloat(String(d.totalAmount)) || 0;
+      map.set(shop, (map.get(shop) || 0) + amount);
     });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
@@ -73,7 +74,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ items }) =
               <Tooltip 
                 cursor={{ fill: '#f1f5f9' }}
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                formatter={(value: number) => [`${value.toFixed(2)} DKK`, 'Amount']}
+                formatter={(value: number) => [`${(value || 0).toFixed(2)} DKK`, 'Amount']}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
                 {shopData.map((entry, index) => (

@@ -45,6 +45,12 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
     setZoomPos({ x, y });
   };
 
+  // Safe formatting function
+  const formatAmount = (val: any) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? "0.00" : num.toFixed(2);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row transition-all hover:shadow-md">
       <div 
@@ -157,7 +163,7 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800">{(item.data?.totalAmount ?? 0).toFixed(2)}</div>
+                <div className="font-semibold text-slate-800">{formatAmount(item.data?.totalAmount)}</div>
               )}
             </div>
 
@@ -172,7 +178,7 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800">{(item.data?.moms ?? 0).toFixed(2)}</div>
+                <div className="font-semibold text-slate-800">{formatAmount(item.data?.moms)}</div>
               )}
             </div>
           </div>
