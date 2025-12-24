@@ -1,0 +1,5 @@
+{
+  "name": "DanishReceiptsScanner",
+  "description": "A smart tool to extract purchase details, dates, and VAT (MOMS) from Danish receipts using Gemini 2.5 Flash.",
+  "requestFramePermissions": []
+}

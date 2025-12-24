@@ -7,6 +7,13 @@ export const ProcessingStatus = {
 
 export type ProcessingStatus = typeof ProcessingStatus[keyof typeof ProcessingStatus];
 
+export const Provider = {
+  GEMINI: 'GEMINI',
+  OPENROUTER: 'OPENROUTER'
+} as const;
+
+export type Provider = typeof Provider[keyof typeof Provider];
+
 export interface ExtractedData {
   shopName: string;
   purchaseDate: string; // YYYY-MM-DD
@@ -21,9 +28,4 @@ export interface ReceiptItem {
   status: ProcessingStatus;
   data?: ExtractedData;
   error?: string;
-}
-
-export interface ChartDataPoint {
-  name: string;
-  value: number;
 }

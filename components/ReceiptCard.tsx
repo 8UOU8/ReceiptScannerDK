@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ProcessingStatus } from '../types';
-import type { ReceiptItem, ExtractedData } from '../types';
+import { ReceiptItem, ProcessingStatus, ExtractedData } from '../types';
 import { Trash2, CheckCircle, AlertCircle, Loader2, Edit2, Save, X } from 'lucide-react';
 
 interface ReceiptCardProps {
@@ -18,7 +17,6 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
     moms: 0
   });
 
-  // Zoom state
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -41,18 +39,14 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageContainerRef.current) return;
-    
     const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
-    // Calculate percentage position
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
-    
     setZoomPos({ x, y });
   };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row transition-all hover:shadow-md">
-      {/* Image Preview with Zoom */}
       <div 
         ref={imageContainerRef}
         className="relative w-full sm:w-48 h-48 sm:h-auto bg-slate-100 flex-shrink-0 overflow-hidden cursor-crosshair group"
@@ -73,31 +67,30 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
         )}
       </div>
 
-      {/* Content */}
       <div className="p-4 flex-grow flex flex-col justify-between">
         <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded truncate max-w-[150px]">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded truncate max-w-[120px]">
               {item.file.name}
             </span>
             {item.status === ProcessingStatus.PROCESSING && (
-              <span className="flex items-center gap-1 text-xs text-blue-600 font-medium">
+              <span className="flex items-center gap-1 text-xs text-blue-600 font-medium whitespace-nowrap">
                 <Loader2 size={12} className="animate-spin" /> Processing...
               </span>
             )}
             {item.status === ProcessingStatus.COMPLETED && (
-              <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+              <span className="flex items-center gap-1 text-xs text-green-600 font-medium whitespace-nowrap">
                 <CheckCircle size={12} /> Done
               </span>
             )}
             {item.status === ProcessingStatus.ERROR && (
-              <span className="flex items-center gap-1 text-xs text-red-600 font-medium">
+              <span className="flex items-center gap-1 text-xs text-red-600 font-medium whitespace-nowrap">
                 <AlertCircle size={12} /> Failed
               </span>
             )}
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
              {item.status === ProcessingStatus.COMPLETED && !isEditing && (
               <button 
                 onClick={() => setIsEditing(true)}
@@ -135,7 +128,7 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800 truncate" title={item.data?.shopName}>{item.data?.shopName}</div>
+                <div className="font-semibold text-slate-800 truncate" title={item.data?.shopName}>{item.data?.shopName || "Unknown"}</div>
               )}
             </div>
 
@@ -149,7 +142,7 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800">{item.data?.purchaseDate}</div>
+                <div className="font-semibold text-slate-800">{item.data?.purchaseDate || "N/A"}</div>
               )}
             </div>
 
@@ -160,11 +153,11 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   type="number" 
                   step="0.01"
                   value={editForm.totalAmount} 
-                  onChange={(e) => setEditForm({...editForm, totalAmount: parseFloat(e.target.value)})}
+                  onChange={(e) => setEditForm({...editForm, totalAmount: parseFloat(e.target.value) || 0})}
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800">{item.data?.totalAmount.toFixed(2)}</div>
+                <div className="font-semibold text-slate-800">{(item.data?.totalAmount ?? 0).toFixed(2)}</div>
               )}
             </div>
 
@@ -175,11 +168,11 @@ export const ReceiptCard: React.FC<ReceiptCardProps> = ({ item, onDelete, onUpda
                   type="number" 
                   step="0.01"
                   value={editForm.moms} 
-                  onChange={(e) => setEditForm({...editForm, moms: parseFloat(e.target.value)})}
+                  onChange={(e) => setEditForm({...editForm, moms: parseFloat(e.target.value) || 0})}
                   className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <div className="font-semibold text-slate-800">{item.data?.moms.toFixed(2)}</div>
+                <div className="font-semibold text-slate-800">{(item.data?.moms ?? 0).toFixed(2)}</div>
               )}
             </div>
           </div>
